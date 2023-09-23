@@ -22,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
 
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -58,7 +59,10 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authProvider(){
+        //디비에 저장된 사용자 정보를 비교하는데 사용.
+        //그 밖에도 AuthenticationProvider는 여러가지 타입으로 있다.
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        //프로바이더에서 UserDeailService를 실행
         provider.setUserDetailsService(customUserDetailService);
         provider.setPasswordEncoder(bCryptPasswordEncoder());
         return provider;
@@ -66,7 +70,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 //csrf 토큰 비활성화
                 .csrf().disable()
@@ -81,6 +84,7 @@ public class SecurityConfig {
                 .usernameParameter("memberEmail")
                 .passwordParameter("password")
                 .loginProcessingUrl("/login/action")
+                .defaultSuccessUrl("/login")
                 .successHandler(loginSuccessHandler)//로그인에 성공시 핸들러(계정잠금횟수리셋 + 권한에 따른 페이지 이동)
                 .failureHandler(loginFailureHandler)//로그인에 실패시 핸들러(계정잠금 + 로그인 실패시 에러 메시지)
                 .permitAll();

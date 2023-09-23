@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -45,8 +44,13 @@ public class Member extends BaseTime {
     @Setter
     private Date lockTime;
 
+    private String provider; //어떤 OAuth인지(google, naver 등)
+
+    private String provideId; // 해당 OAuth 의 key(id)
+
     @Builder
-    public Member(Long id, String memberId, String password,String memberName, String memberEmail, String memberPhone,Role role,UserState userState,boolean enabled,boolean accountNonLocked,int failCount,Date lockTime) {
+    public Member(Long id, String memberId, String password,String memberName, String memberEmail, String memberPhone,Role role,UserState userState,boolean enabled,boolean accountNonLocked,int failCount,
+                  Date lockTime,String provider,String provideId) {
         this.id = id;
         this.memberId = memberId;
         this.password = password;
@@ -61,16 +65,14 @@ public class Member extends BaseTime {
         this.accountNonLocked = accountNonLocked;
         this.failCount = failCount;
         this.lockTime = lockTime;
+        this.provider = provider;
+        this.provideId = provideId;
     }
 
     //회원 휴먼 상태 및 계정 잠금 변환
     public Member setUserState(){
         userState = UserState.NONHUMAN;
         return this;
-    }
-
-    public void addFailCount(){
-        this.failCount++;
     }
 
     public void memberUpdate(MemberRequest member){
