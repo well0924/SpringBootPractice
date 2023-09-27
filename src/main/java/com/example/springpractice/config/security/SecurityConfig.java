@@ -1,6 +1,7 @@
 package com.example.springpractice.config.security;
 
 import com.example.springpractice.config.security.auth.CustomUserDetailService;
+import com.example.springpractice.config.security.auth.CustomUserOAuthService;
 import com.example.springpractice.config.security.handler.CustomFailHandler;
 import com.example.springpractice.config.security.handler.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,9 @@ public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+    private final CustomUserOAuthService customUserOAuthService;
+
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfiguration) throws Exception {
@@ -64,7 +64,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         //프로바이더에서 UserDeailService를 실행
         provider.setUserDetailsService(customUserDetailService);
-        provider.setPasswordEncoder(bCryptPasswordEncoder());
+        provider.setPasswordEncoder(bCryptPasswordEncoder);
         return provider;
     }
 
@@ -80,19 +80,35 @@ public class SecurityConfig {
 
         http
                 .formLogin()
-                .loginPage("/login")
+                .loginPage("/loginPage")
                 .usernameParameter("memberEmail")
                 .passwordParameter("password")
                 .loginProcessingUrl("/login/action")
-                .defaultSuccessUrl("/login")
                 .successHandler(loginSuccessHandler)//로그인에 성공시 핸들러(계정잠금횟수리셋 + 권한에 따른 페이지 이동)
                 .failureHandler(loginFailureHandler)//로그인에 실패시 핸들러(계정잠금 + 로그인 실패시 에러 메시지)
                 .permitAll();
 
+        //자동 로그인
+        http
+                .rememberMe()
+                .key("key")//토큰 생성용 키값(필수)
+                .rememberMeParameter("remember-me")
+                .tokenValiditySeconds(3600*24*365)
+                .userDetailsService(customUserDetailService)
+                .authenticationSuccessHandler(loginSuccessHandler);
+
+        //소셜 로그인 설정
+        http
+                .oauth2Login()
+                .loginPage("/loginPage")
+                .userInfoEndpoint()
+                .userService(customUserOAuthService);
+
+        //로그아웃 설정
         http
                 .logout()
                 .logoutUrl("/logout")//로그아웃을 하는데 필요한 url
-                .logoutSuccessUrl("/login")
+                .logoutSuccessUrl("/loginPage")
                 .deleteCookies("JSESSIONID")//로그아웃을 했을시 저장된 쿠키를 삭제
                 .invalidateHttpSession(true);//로그아웃시 저장된 세션을 제거
 

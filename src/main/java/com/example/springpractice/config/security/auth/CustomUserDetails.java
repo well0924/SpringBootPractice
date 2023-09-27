@@ -4,18 +4,33 @@ import com.example.springpractice.domain.Member;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 @Data
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails ,OAuth2User{
 
     private Member member;
+    private Map<String,Object> attributes;
 
     public CustomUserDetails(Member member){
         this.member = member;
     }
 
+    public CustomUserDetails(Member member,Map<String,Object>attributes){
+        this.member = member;
+        this.attributes = attributes;
+    }
+
+    //OAuth2 에서 상속받은 메서드
+    public Map<String,Object> getAttribute() {
+        return attributes;
+    }
+
+    //UserDetailService에서 상속받은 메서드
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collectors = new ArrayList<>();
@@ -57,5 +72,10 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return member.isEnabled();
+    }
+
+    @Override
+    public String getName() {
+        return null;
     }
 }

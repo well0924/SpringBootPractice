@@ -7,6 +7,7 @@ import com.example.springpractice.domain.dto.MemberRequest;
 import com.example.springpractice.domain.dto.MemberResponse;
 import com.example.springpractice.repository.MemberRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
