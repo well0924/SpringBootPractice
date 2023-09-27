@@ -4,16 +4,15 @@ import com.example.springpractice.config.base.BaseTime;
 import com.example.springpractice.config.constant.Role;
 import com.example.springpractice.config.constant.UserState;
 import com.example.springpractice.domain.dto.MemberRequest;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 @Getter
+@ToString
 @NoArgsConstructor
 public class Member extends BaseTime {
     @Id
@@ -49,8 +48,8 @@ public class Member extends BaseTime {
     private String provideId; // 해당 OAuth 의 key(id)
 
     @Builder
-    public Member(Long id, String memberId, String password,String memberName, String memberEmail, String memberPhone,Role role,UserState userState,boolean enabled,boolean accountNonLocked,int failCount,
-                  Date lockTime,String provider,String provideId) {
+    public Member(Long id, String memberId, String password, String memberName, String memberEmail, String memberPhone, Role role, UserState userState, boolean enabled, boolean accountNonLocked, int failCount,
+                  Date lockTime, String provider, String provideId, LocalDateTime createdTime) {
         this.id = id;
         this.memberId = memberId;
         this.password = password;
