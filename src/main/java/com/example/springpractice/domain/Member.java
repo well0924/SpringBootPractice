@@ -29,9 +29,11 @@ public class Member extends BaseTime {
     //회원 등급
     @Enumerated(EnumType.STRING)
     private Role role;
+    //계정 사용여부
 
+    @Setter
     private boolean enabled;
-
+    //계정이 잠겼는지 확인
     @Setter
     @Column
     private boolean accountNonLocked;
@@ -69,9 +71,13 @@ public class Member extends BaseTime {
     }
 
     //회원 휴먼 상태 및 계정 잠금 변환
-    public Member setUserState(){
-        userState = UserState.NONHUMAN;
+    public Member setUserStateHuman(){
+        userState = UserState.HUMAN;
         return this;
+    }
+
+    public void setUserState(UserState state){
+        this.userState = state;
     }
 
     public void memberUpdate(MemberRequest member){

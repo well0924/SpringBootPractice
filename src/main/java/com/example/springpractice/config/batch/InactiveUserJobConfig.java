@@ -10,6 +10,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,21 +29,17 @@ public class InactiveUserJobConfig {
     private final MemberRepository memberRepository;
 
     @Bean
-    public Job inactiveUserJob() {
+    public Job inactiveUserJob() throws Exception {
         return jobBuilderFactory.get("inactiveUserJob3")
-                .preventRestart()
-                .start(inactiveJobStep(null))
+                .start(inactiveJobStep())
+                .incrementer(new RunIdIncrementer())
                 .build();
     }
 
     @Bean
-    public Step inactiveJobStep(@Value("#{jobParameters[requestDate]}") final String requestDate) {
-        log.info("requestDate: {}", requestDate);
+    public Step inactiveJobStep()throws Exception {
         return stepBuilderFactory.get("inactiveUserStep")
                 .<Member,Member>chunk(10)
-                .faultTolerant()
-                .retryLimit(3)
-                .retry(Exception.class)
                 .reader(inactiveUserReader())
                 .processor(inactiveUserProcessor())
                 .writer(inactiveUserWriter())
@@ -50,27 +47,26 @@ public class InactiveUserJobConfig {
     }
 
     @Bean
-    @StepScope //(1)
+    //@StepScope
+    public ItemWriter<Member> inactiveUserWriter() {
+        return ((List<? extends Member> members) -> memberRepository.saveAll(members));
+    }
+
+    @Bean
+    //@StepScope
+    public ItemProcessor<Member,Member> inactiveUserProcessor() {
+        return Member::setUserStateHuman;
+    }
+
+    @Bean
+    //@StepScope //(1)
     public QueueItemReader<Member> inactiveUserReader() {
         //(2)
         List<Member> oldUsers =
                 memberRepository.findByUpdatedTimeBeforeAndUserStateEquals(
                         LocalDateTime.now().minusYears(1),
-                        UserState.HUMAN);
-
+                        UserState.NONHUMAN);
+        log.info(oldUsers.size());
         return new QueueItemReader<>(oldUsers); //(3)
-    }
-
-    public ItemProcessor<Member,Member> inactiveUserProcessor() {
-        return new org.springframework.batch.item.ItemProcessor<Member,Member>() {
-            @Override
-            public Member process(Member member) throws Exception {
-                return member.setUserState();
-            }
-        };
-    }
-
-    public ItemWriter<Member> inactiveUserWriter() {
-        return ((List<? extends Member> members) -> memberRepository.saveAll(members));
     }
 }

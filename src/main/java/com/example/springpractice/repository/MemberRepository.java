@@ -23,6 +23,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     //아이디 찾기
     Optional<Member>findByMemberName(String memberName);
     //휴먼회원 전환
-    List<Member> findByUpdatedTimeBeforeAndUserStateEquals(LocalDateTime localDateTime, UserState state);
+    List<Member> findByUpdatedTimeBeforeAndUserStateEquals(LocalDateTime localDateTime, UserState userState);
 
 }

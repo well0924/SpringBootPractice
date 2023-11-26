@@ -2,9 +2,6 @@ package com.example.springpractice.config.batch;
 
 
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +16,7 @@ public class QueueItemReader<T>implements ItemReader<T> {
     }
 
     @Override
-    public T read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public T read() throws Exception{
         return queue.poll();
     }
 }
