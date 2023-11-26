@@ -31,7 +31,8 @@ public class InactiveUserJobConfig {
     @Bean
     public Job inactiveUserJob() throws Exception {
         return jobBuilderFactory.get("inactiveUserJob3")
-                .start(inactiveJobStep())
+                .preventRestart()//job의 재실행을 막기.
+                .start(inactiveJobStep())//job을 시작하기.(휴먼회원 변경)
                 .incrementer(new RunIdIncrementer())
                 .build();
     }
