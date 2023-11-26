@@ -47,6 +47,7 @@ public class CustomUserOAuthService extends DefaultOAuth2UserService {
 
         Optional<Member> member = memberRepository.findByMemberEmail(email);
         Member member1 = null;
+        //처음 OAuth를 사용하는 경우
         if(member.isEmpty()){
             LocalDateTime createdTime = LocalDateTime.now();
             member1 = Member
@@ -61,8 +62,6 @@ public class CustomUserOAuthService extends DefaultOAuth2UserService {
                     .createdTime(createdTime)
                     .build();
             memberRepository.save(member1);
-        }else{
-            member1 = member.get();
         }
 
         return new CustomUserDetails(member.get(),oAuth2User.getAttributes());

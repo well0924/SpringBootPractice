@@ -47,8 +47,10 @@ public class MemberService {
     //계정 잠금
     @Transactional
     public void lock(Member member) {
-        member.isAccountNonLocked();
+        member.setUserState(UserState.USER_LOCK);
+        member.setAccountNonLocked(false);
         member.setLockTime(new Date());
+        member.setEnabled(false);
         repo.save(member);
     }
 
@@ -60,6 +62,8 @@ public class MemberService {
 
         if (lockTimeInMillis + LOCK_TIME_DURATION < currentTimeInMillis) {
             member.setAccountNonLocked(true);
+            member.setEnabled(true);
+            member.setUserState(UserState.NONHUMAN);
             member.setLockTime(null);
             member.setFailCount(0);
             repo.save(member);
@@ -151,7 +155,7 @@ public class MemberService {
         return member.get().getMemberId();
     }
 
-    //회원 비밀번호 리셋화
+    //회원 비밀번호 재설정
     @Transactional
     public void passwordReset(MemberRequest memberRequest){
         Member member = Member.builder()

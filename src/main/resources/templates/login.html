@@ -15,9 +15,6 @@
         <div th:if="${param.error}">
             <p class="text-danger">[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</p>
         </div>
-        <div th:if="${param.error}">
-            <p class="text-danger">[[${param}]]</p>
-        </div>
         <div th:if="${param.logout}">
             <p class="text-warning">You have been logged out.</p>
         </div>
@@ -36,7 +33,9 @@
             <p>
                 <input type="submit" value="Login" class="btn btn-primary" />
             </p>
-
+            <p>
+                <a th:href="@{/oauth2/authorization/kakao}" class="btn btn-primary">socialLogin</a>
+            </p>
         </div>
     </form>
 </div>
