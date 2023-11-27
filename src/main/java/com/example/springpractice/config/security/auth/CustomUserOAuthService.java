@@ -1,6 +1,7 @@
 package com.example.springpractice.config.security.auth;
 
 import com.example.springpractice.config.constant.Role;
+import com.example.springpractice.config.constant.UserState;
 import com.example.springpractice.domain.Member;
 import com.example.springpractice.domain.dto.KakaoUserInfo;
 import com.example.springpractice.domain.dto.OAuth2UserInfo;
@@ -57,6 +58,9 @@ public class CustomUserOAuthService extends DefaultOAuth2UserService {
                     .memberEmail(email)
                     .memberName(memberName)
                     .provider(provider)
+                    .enabled(true)
+                    .accountNonLocked(true)
+                    .userState(UserState.NONHUMAN)
                     .provideId(providerId)
                     .role(role)
                     .createdTime(createdTime)

@@ -102,7 +102,10 @@ public class SecurityConfig {
                 .oauth2Login()
                 .loginPage("/loginPage")
                 .userInfoEndpoint()
-                .userService(customUserOAuthService);
+                .userService(customUserOAuthService)
+                .and()
+                .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler);
 
         //로그아웃 설정
         http
