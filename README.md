@@ -11,9 +11,9 @@
 * [x] 로그인을 했을시 권한에 맞게 페이지로 이동을 하기.
 * [x] 로그인 실패시 에러 메시지 나오게 하기.
 * [x] 자동 로그인기능 만들기.(remember-me 기능).
-* [ ] 소셜 로그인을 통해서 로그인을 하기.(카카오).
+* [x] 소셜 로그인을 통해서 로그인을 하기.(카카오).
 * [x] 회원 가입을 했을시 특정 시간이 지나면 회원을 휴먼 회원으로 변경.
-* [ ] 하루가 지나면 자동으로 회원 목록을 csv 파일로 저장.
+* [x] 하루가 지나면 자동으로 회원 목록을 csv 파일로 저장.
 
 ## 시나리오
 
@@ -41,18 +41,150 @@
 
 ## 구현 화면
 
-1. 로그인 화면 v
+1. 로그인 (회원) 
 
-2. 로그인에 성공한 경우 + 소셜 로그인도 포함. v
+<img src="https://github.com/well0924/jpapractice/assets/89343159/ba6ee860-a2b9-4f76-8814-94d2a113bb2c">
 
-3. 실패했을시 에러 문구 v
+2. 로그인 (관리자)
 
-4. 3회 실패시 계정 잠금 v
-
-5. 계정이 잠겼을시 이메일을 같이 전송
-
-6. 회원 가입일로부터 특정기간동안 활동이 없는경우에는 회원을 휴먼회원으로 변경하기 v
-
-7. 회원 목록을 csv파일로 만들기.(하루에 한번 사용하게끔 하기.) v
+<img src="https://github.com/well0924/jpapractice/assets/89343159/53acb864-ea07-4621-98e6-2f323887cd29">
 
 
+3. 비밀번호를 3회 실패한 경우 계정 잠금
+
+<img src="https://github.com/well0924/jpapractice/assets/89343159/e1e66d73-8483-4cc2-9e51-cb628ef6cfb2">
+
+4. remember-me 기능
+
+<img src="https://github.com/well0924/jpapractice/assets/89343159/6abae093-bc83-4ddc-bf47-a1ff802b6970">
+
+5. socialLogin 기능 (kakao)
+
+<img src="https://github.com/well0924/jpapractice/assets/89343159/a7a5ac73-f719-42ab-959e-0a82caa38d44">
+
+5. 회원 가입일로부터 특정기간동안 활동이 없는경우에는 회원을 휴먼회원으로 변경하기
+
+작성코드 
+```
+@Log4j2
+@Configuration
+@RequiredArgsConstructor
+public class InactiveUserJobConfig {
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final MemberRepository memberRepository;
+
+    @Bean
+    public Job inactiveUserJob() throws Exception {
+        return jobBuilderFactory.get("inactiveUserJob3")
+                .preventRestart()//job의 재실행을 막기.
+                .start(inactiveJobStep())//job을 시작하기.(휴먼회원 변경)
+                .incrementer(new RunIdIncrementer())
+                .build();
+    }
+
+    @Bean
+    public Step inactiveJobStep()throws Exception {
+        return stepBuilderFactory.get("inactiveUserStep")
+                .<Member,Member>chunk(10)
+                .reader(inactiveUserReader())
+                .processor(inactiveUserProcessor())
+                .writer(inactiveUserWriter())
+                .build();
+    }
+
+    @Bean
+    //@StepScope
+    public ItemWriter<Member> inactiveUserWriter() {
+        return ((List<? extends Member> members) -> memberRepository.saveAll(members));
+    }
+
+    @Bean
+    //@StepScope
+    public ItemProcessor<Member,Member> inactiveUserProcessor() {
+        return Member::setUserStateHuman;
+    }
+
+    @Bean
+    //@StepScope //(1)
+    public QueueItemReader<Member> inactiveUserReader() {
+        //(2)
+        List<Member> oldUsers =
+                memberRepository.findByUpdatedTimeBeforeAndUserStateEquals(
+                        LocalDateTime.now().minusYears(1),
+                        UserState.NONHUMAN);
+        log.info(oldUsers.size());
+        return new QueueItemReader<>(oldUsers); //(3)
+    }
+}
+```
+
+6. 회원 목록을 csv파일로 만들기.
+
+작성 코드
+```
+@Log4j2
+@Configuration
+@RequiredArgsConstructor
+public class MemberJobConfig {
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final MemberRepository memberRepository;
+    private String[] names;
+
+    @Bean
+    public Job itemWriterJob()throws Exception{
+        return this.jobBuilderFactory
+                .get("itemWriterJob")
+                .preventRestart()
+                .incrementer(new RunIdIncrementer())
+                .start(this.csvItemWriterStep())
+                .build();
+    }
+    @Bean
+    public Step csvItemWriterStep() throws Exception {
+        return  this.stepBuilderFactory.get("csvItemWriterStep")
+                .<Member,Member>chunk(10)
+                .reader(itemReader())
+                .writer(csvFileItemWriter())
+                .build();
+    }
+    private ItemReader<Member>itemReader(){
+        return new ListItemReader<>(getItems());
+    }
+    private List<Member>getItems(){
+        return memberRepository.findAll();
+    }
+    public void setNames(String[]names){
+        Assert.notNull(names,"Names must be non-null");
+        this.names = Arrays.asList(names).toArray(new String[names.length]);
+    }
+    private ItemWriter<? super Member>csvFileItemWriter() throws Exception {
+
+        BeanWrapperFieldExtractor<Member>memberBeanWrapperFieldExtractor = new BeanWrapperFieldExtractor<>();
+
+        memberBeanWrapperFieldExtractor.setNames(new String[]{"memberId","memberName","memberPhone","memberEmail","Role","UserState"});
+
+        DelimitedLineAggregator<Member>delimitedLineAggregator = new DelimitedLineAggregator<>();
+        delimitedLineAggregator.setDelimiter(",");
+        delimitedLineAggregator.setFieldExtractor(memberBeanWrapperFieldExtractor);
+
+        FlatFileItemWriter<Member>flatFileItemWriter = new FlatFileItemWriterBuilder<Member>()
+                .name("csvFileItemWriter")
+                .encoding("UTF-8")
+                .resource(new FileSystemResource("src/main/resources/test-data.csv"))
+                .lineAggregator(delimitedLineAggregator)
+                .headerCallback(writer -> writer.write("memberId,memberName,memberPhone,memberEmail,Role,UserState"))
+                .append(true)
+                .build();
+        flatFileItemWriter.afterPropertiesSet();
+
+        return flatFileItemWriter;
+    }
+}
+```
+
+결과물 
+
+[test-data.csv](src%2Fmain%2Fresources%2Ftest-data.csv)
