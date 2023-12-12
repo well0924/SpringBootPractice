@@ -1,4 +1,4 @@
-package com.example.springpractice.config.batch;
+package com.example.springpractice.config.batch.IsHuman;
 
 
 import org.springframework.batch.item.ItemReader;
