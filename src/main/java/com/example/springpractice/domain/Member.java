@@ -30,7 +30,6 @@ public class Member extends BaseTime {
     @Enumerated(EnumType.STRING)
     private Role role;
     //계정 사용여부
-
     @Setter
     private boolean enabled;
     //계정이 잠겼는지 확인

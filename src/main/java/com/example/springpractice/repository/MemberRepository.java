@@ -22,7 +22,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     boolean existsByMemberId(String memberName);
     //아이디 찾기
     Optional<Member>findByMemberName(String memberName);
-    //휴먼회원 전환
+    //휴먼회원 전환확인
     List<Member> findByUpdatedTimeBeforeAndUserStateEquals(LocalDateTime localDateTime, UserState userState);
 
 }
