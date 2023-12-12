@@ -6,7 +6,6 @@ import com.example.springpractice.domain.Member;
 import com.example.springpractice.domain.dto.MemberRequest;
 import com.example.springpractice.domain.dto.MemberResponse;
 import com.example.springpractice.repository.MemberRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -161,6 +160,13 @@ public class MemberService {
         Member member = Member.builder()
                 .password(passwordEncoder.encode(memberRequest.getPassword()))
                 .build();
+        repo.save(member);
+    }
+
+    //휴먼회원 해제
+    @Transactional
+    public void activeNonHuman(Member member){
+        member.setUserState(UserState.NONHUMAN);
         repo.save(member);
     }
 }
