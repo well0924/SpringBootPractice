@@ -1,5 +1,6 @@
 package com.example.springpractice.config.batch.IsHuman;
 
+import com.example.springpractice.config.batch.MemberListExcel.MemberListExcel;
 import com.example.springpractice.config.batch.SendMail.HumanEmailSender;
 import com.example.springpractice.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +25,12 @@ public class InactiveUserJobConfig {
     //시나리오는 반년간 활동이 없는 회원을 조회
     //flow 를 사용하기.
     @Bean
-    public Job inactiveUserJob() {
+    public Job inactiveUserJob() throws Exception {
         return jobBuilderFactory
                 .get("inactiveUserJob")
                 .preventRestart()
                 .incrementer(new RunIdIncrementer())
-                .start(inactiveJobStep())//job을 시작하기.(휴먼회원 변경)
+                .start(inactiveJobStep())
                 .build();
 
     }
