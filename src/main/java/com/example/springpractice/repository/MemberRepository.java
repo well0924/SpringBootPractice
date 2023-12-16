@@ -24,5 +24,4 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member>findByMemberName(String memberName);
     //휴먼회원 전환확인
     List<Member> findByUpdatedTimeBeforeAndUserStateEquals(LocalDateTime localDateTime, UserState userState);
-
 }

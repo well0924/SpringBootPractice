@@ -198,3 +198,5 @@ public class MemberJobConfig {
 
 [test-data.csv](src%2Fmain%2Fresources%2Ftest-data.csv)
 
+7. 회원 정보를 엑셀파일로 저장하기.
+

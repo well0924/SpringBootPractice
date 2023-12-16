@@ -1,6 +1,5 @@
 package com.example.springpractice.config.batch.IsHuman;
 
-import com.example.springpractice.config.batch.MemberListExcel.MemberListExcel;
 import com.example.springpractice.config.batch.SendMail.HumanEmailSender;
 import com.example.springpractice.domain.Member;
 import lombok.RequiredArgsConstructor;

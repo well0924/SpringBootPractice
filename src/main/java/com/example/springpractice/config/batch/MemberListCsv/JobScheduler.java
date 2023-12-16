@@ -1,6 +1,5 @@
 package com.example.springpractice.config.batch.MemberListCsv;
 
-import com.example.springpractice.config.batch.MemberListCsv.MemberJobConfig;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.JobExecution;
@@ -27,7 +26,7 @@ public class JobScheduler {
     private final MemberJobConfig memberJobConfig;
 
     //매일 새벽4시에 작동되게 하기.
-    @Scheduled(cron = "0 0 4 * * *")
+    //@Scheduled(cron = "0 0 4 * * *")
     public void memberListCsvScheduler(){
         // 넘기는 파라미터를 매번 다르게 해서 별개의 JobInstance로 인식하게 함
         Map<String, JobParameter> scheduleMap = new HashMap<>();
