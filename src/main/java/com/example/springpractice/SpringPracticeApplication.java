@@ -2,6 +2,7 @@ package com.example.springpractice;
 
 import com.example.springpractice.config.batch.MemberListCsv.JobScheduler;
 import com.example.springpractice.config.batch.MemberListExcel.ExcelConfig;
+import com.example.springpractice.config.batch.MemberListExcel.ExcelScheduler;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,8 +20,8 @@ public class SpringPracticeApplication {
 
         ConfigurableApplicationContext context = SpringApplication.run(SpringPracticeApplication.class, args);
 
-        JobScheduler config = context.getBean(JobScheduler.class);
-        config.memberListCsvScheduler();
+        ExcelScheduler excelConfig = context.getBean(ExcelScheduler.class);
+        excelConfig.memberExcelScheduler();
     }
 
 }

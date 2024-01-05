@@ -1,61 +1,53 @@
 package com.example.springpractice.config.batch.MemberListExcel;
 
-import com.example.springpractice.domain.Member;
 import com.example.springpractice.domain.dto.MemberExcelDto;
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.batch.core.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Log4j2
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
+@EnableBatchProcessing
 public class ExcelConfig {
 
-    private final JobLauncher jobLauncher;
     private final JobBuilderFactory jobBuilderFactory;
+
     private final StepBuilderFactory stepBuilderFactory;
 
-    @Bean
-    public ExcelItemReader reader() {
-        return new ExcelItemReader();
-    }
+    private final MemberItemReader memberItemReader;
+
+    private final MemberProcessor memberItemProcessor;
+
+    private final MemberWriter memberItemWriter;
 
     @Bean
-    public ItemWriter<List<MemberExcelDto>> writer() {
-        return new ExcelItemWriter();
-    }
-
-    @Bean
-    public Step step(ItemReader<List<Member>> reader, ItemWriter<List<MemberExcelDto>> writer) {
-        return stepBuilderFactory.get("step")
-                .<List<Member>, List<MemberExcelDto>>chunk(10)
-                .reader(reader)
-                .writer(writer)
-                .build();
-    }
-
-    @Bean
-    public Job job(Step step) {
-        return jobBuilderFactory.get("job")
-                .flow(step)
+    public Job importMemberJob() throws Exception {
+        return  jobBuilderFactory.get("importMemberJob")
+                .incrementer(new RunIdIncrementer())
+                .preventRestart()
+                .flow(step())
                 .end()
                 .build();
     }
 
-    public void launchJob() throws Exception {
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
-                .toJobParameters();
-
-        jobLauncher.run(job(step(reader(),writer())), jobParameters);
+    @Bean
+    public Step step() throws Exception {
+        return stepBuilderFactory.get("step")
+                .<List<MemberExcelDto>, List<MemberExcelDto>>chunk(10000)
+                .reader((ItemReader<? extends List<MemberExcelDto>>) memberItemReader.read())
+                .processor(memberItemProcessor)
+                .writer(memberItemWriter)
+                .build();
     }
+
+
 }

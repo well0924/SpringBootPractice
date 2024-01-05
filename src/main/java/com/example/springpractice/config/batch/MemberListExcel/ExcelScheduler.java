@@ -1,6 +1,6 @@
-package com.example.springpractice.config.batch.MemberListCsv;
+package com.example.springpractice.config.batch.MemberListExcel;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
@@ -10,7 +10,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -18,23 +17,21 @@ import java.util.Map;
 
 @Log4j2
 @Component
-@AllArgsConstructor
-public class JobScheduler {
+@RequiredArgsConstructor
+public class ExcelScheduler {
+
+    private final ExcelConfig excelConfig;
 
     private final JobLauncher jobLauncher;
 
-    private final MemberJobConfig memberJobConfig;
-
-    //매일 새벽4시에 작동되게 하기.
-    /*@Scheduled(cron = "0 0 4 * * *")
-    public void memberListCsvScheduler(){
+    public void memberExcelScheduler(){
         // 넘기는 파라미터를 매번 다르게 해서 별개의 JobInstance로 인식하게 함
         Map<String, JobParameter> scheduleMap = new HashMap<>();
         scheduleMap.put("time", new JobParameter(System.currentTimeMillis()));
         JobParameters jobParameters = new JobParameters(scheduleMap);
 
         try {
-            JobExecution jobExecution = jobLauncher.run(memberJobConfig.itemWriterJob(), jobParameters);
+            JobExecution jobExecution = jobLauncher.run(excelConfig.importMemberJob(), jobParameters);
 
             log.info("Job Execution: " + jobExecution.getStatus());
             log.info("Job getJobConfigurationName: " + jobExecution.getJobConfigurationName());
@@ -53,5 +50,5 @@ public class JobScheduler {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }*/
+    }
 }

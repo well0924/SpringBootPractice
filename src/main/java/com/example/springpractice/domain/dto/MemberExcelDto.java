@@ -17,8 +17,6 @@ public class MemberExcelDto {
     private String memberName;
     private String memberPhone;
     private String memberEmail;
-    private UserState userState;
-    private Role role;
 
     @Builder
     public MemberExcelDto(Member member){
@@ -27,7 +25,5 @@ public class MemberExcelDto {
         this.memberName = member.getMemberName();
         this.memberEmail = member.getMemberEmail();
         this.memberPhone = member.getMemberPhone();
-        this.role = member.getRole();
-        this.userState = member.getUserState();
     }
 }
